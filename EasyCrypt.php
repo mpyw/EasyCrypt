@@ -1,17 +1,15 @@
 <?php
 
-/*********************************************/
-/***************** EasyCrypt *****************/
-/*********************************************/
-
-/* EasyCrypt provides simple interface for decryptable encryption.
+/**
+ * EasyCrypt
+ *
+ * A class that provides you simple interface for decryptable encryption.
+ * Requires PHP 5.0.0 or later.
  * 
- * @Version: 1.2
- * @Author : CertaiN
- * @License: CC0 (No rights reserved)
- * @GitHub : http://github.com/certainist/EasyCrypt
- * 
- * Requires PHP **5.0.0** or later.
+ * @Version 1.2
+ * @Author  CertaiN
+ * @License CC0 (No rights reserved)
+ * @GitHub  http://github.com/certainist/EasyCrypt
  */
 
 class EasyCrypt {
@@ -24,6 +22,7 @@ class EasyCrypt {
     *
     * @param string $data Raw data
     * @param string $salt Secret key
+    *
     * @return string Encrypted data
     */
     public static function encrypt($data, $salt) {
@@ -36,6 +35,7 @@ class EasyCrypt {
     *
     * @param string $data Encrypted data
     * @param string $salt Secret key
+    *
     * @return string Decrypted data
     */
     public static function decrypt($data, $salt) {
