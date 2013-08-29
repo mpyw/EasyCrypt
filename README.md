@@ -9,7 +9,7 @@ Usage
 
 ```php
 $raw_data = 'password1234';
-$salt = 'This is vety secret key.';
+$salt = 'This is very secret key.';
 
 $crypted_data = EasyCrypt::encrypt($raw_data, $salt);
 $decrypted_data = EasyCrypt::decrypt($crypted_data, $salt);
