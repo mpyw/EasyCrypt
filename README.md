@@ -1,7 +1,7 @@
 EasyCrypt
 =========
 
-A class that provides you simple interface for **decryptable** encryption.
+A class that provides you simple interface for **decryptable** encryption.  
 Requires PHP 5.0.0 or later.
 
 Usage
