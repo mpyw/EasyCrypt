@@ -6,7 +6,7 @@
  * A class that provides you simple interface for decryptable encryption.
  * Requires PHP 5.0.0 or later.
  * 
- * @Version 1.2
+ * @Version 2.0
  * @Author  CertaiN
  * @License CC0 (No rights reserved)
  * @GitHub  http://github.com/certainist/EasyCrypt
@@ -16,6 +16,8 @@ class EasyCrypt {
     
     private $key;
     private $mc;
+    private $iv_size;
+    private $init;
     
     /**
     * EasyCrypt::encrypt($data, $salt)
@@ -36,7 +38,7 @@ class EasyCrypt {
     * @param string $data Encrypted data
     * @param string $salt Secret key
     *
-    * @return string Decrypted data
+    * @return mixed Decrypted data or FALSE
     */
     public static function decrypt($data, $salt) {
         $obj = new self($salt);
@@ -46,33 +48,44 @@ class EasyCrypt {
     private function __construct($salt) {
         $this->mc = mcrypt_module_open('rijndael-256', '', 'cbc', '');
         $this->key = substr(md5($salt), 0, mcrypt_enc_get_key_size($this->mc));
+        $this->iv_size = mcrypt_enc_get_iv_size($this->mc);
     }
     
     private function __destruct() {
-        mcrypt_generic_deinit($this->mc);
+        if ($this->init) {
+            mcrypt_generic_deinit($this->mc);
+        }
         mcrypt_module_close($this->mc);
     }
     
     private function _encrypt($data) {
         if (PHP_OS === 'WIN32' || PHP_OS === 'WINNT') {
             srand();
-            $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($this->mc), MCRYPT_RAND);
+            $iv = mcrypt_create_iv($this->iv_size, MCRYPT_RAND);
         } else {
-            $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($this->mc), MCRYPT_DEV_URANDOM);
+            $iv = mcrypt_create_iv($this->iv_size, MCRYPT_DEV_URANDOM);
         }
         mcrypt_generic_init($this->mc, $this->key, $iv);
-        $data = mcrypt_generic($this->mc, $data);
-        return base64_encode(base64_encode($iv) . '-' . base64_encode($data));
+        $this->init = true;
+        $data = mcrypt_generic($this->mc, base64_encode($data));
+        return rtrim(base64_encode(base64_encode($iv) . '-' . base64_encode($data)), '=');
     }
     
     private function _decrypt($data) {
-        $arr = explode('-', base64_decode($data), 2);
-        if (!isset($arr[1])) {
-            return '';
+        list($iv, $data) = array_map('base64_decode',
+            explode(
+                '-',
+                base64_decode($data, true),
+                2
+            ) 
+            + array(1 => null)
+        );
+        if ($data === null || !isset($iv[$this->iv_size - 1])) {
+            return false;
         }
-        list($iv, $data) = $arr;
-        mcrypt_generic_init($this->mc, $this->key, base64_decode($iv));
-        return rtrim(mdecrypt_generic($this->mc, base64_decode($data)), "\0");
+        mcrypt_generic_init($this->mc, $this->key, $iv);
+        $this->init = true;
+        return base64_decode(rtrim(mdecrypt_generic($this->mc, $data), "\0"), true);
     }
-
+    
 }

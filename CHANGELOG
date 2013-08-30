@@ -1,2 +1,5 @@
 EasyCrypt - changelog
 =====================
+
+2.0.0 (2013-08-30)
++ Fixed bugs on wrong iv or crypted data
