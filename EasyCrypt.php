@@ -78,9 +78,9 @@ class EasyCrypt {
                 base64_decode($data, true),
                 2
             ) 
-            + array(1 => null)
+            + array(1 => '')
         );
-        if ($data === null || !isset($iv[$this->iv_size - 1])) {
+        if ($data === '' || !isset($iv[$this->iv_size - 1])) {
             return false;
         }
         mcrypt_generic_init($this->mc, $this->key, $iv);
