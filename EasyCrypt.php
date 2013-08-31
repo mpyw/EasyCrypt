@@ -6,7 +6,7 @@
  * A class that provides you simple interface for decryptable encryption.
  * Requires PHP 5.0.0 or later.
  * 
- * @Version 2.0
+ * @Version 2.0.1
  * @Author  CertaiN
  * @License CC0 (No rights reserved)
  * @GitHub  http://github.com/certainist/EasyCrypt
@@ -25,9 +25,12 @@ class EasyCrypt {
     * @param string $data Raw data
     * @param string $salt Secret key
     *
-    * @return string Encrypted data
+    * @return mixed Encrypted data or FALSE on empty string
     */
     public static function encrypt($data, $salt) {
+        if ((string)$data === '') {
+            return false;
+        }
         $obj = new self($salt);
         return $obj->_encrypt($data);
     }
