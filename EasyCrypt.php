@@ -11,21 +11,25 @@
  * @License CC0 (No rights reserved)
  * @GitHub  http://github.com/certainist/EasyCrypt
  */
-
 class EasyCrypt {
     
+   /**
+    * @access   private
+    * @property
+    */
     private $key;
     private $mc;
     private $iv_size;
     private $init;
     
-    /**
-    * EasyCrypt::encrypt($data, $salt)
-    *
-    * @param string $data Raw data
-    * @param string $salt Secret key
-    *
-    * @return mixed Encrypted data or FALSE on empty string
+   /**
+    * For encrypting.
+    * 
+    * @access public
+    * @static
+    * @param  string $data Raw data.
+    * @param  string $salt Secret key.
+    * @return mixed  Encrypted data or FALSE on empty string.
     */
     public static function encrypt($data, $salt) {
         if ((string)$data === '') {
@@ -35,13 +39,14 @@ class EasyCrypt {
         return $obj->_encrypt($data);
     }
     
-    /**
-    * EasyCrypt::decrypt($data, $salt)
+   /**
+    * For decrypting.
     *
-    * @param string $data Encrypted data
-    * @param string $salt Secret key
-    *
-    * @return mixed Decrypted data or FALSE
+    * @access public
+    * @static
+    * @param  string $data Encrypted data.
+    * @param  string $salt Secret key.
+    * @return mixed  Decrypted data or FALSE.
     */
     public static function decrypt($data, $salt) {
         $obj = new self($salt);
