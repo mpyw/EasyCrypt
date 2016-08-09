@@ -1,8 +1,0 @@
-EasyCrypt - changelog
-=====================
-
-2.0.1 (2013-09-01)
-+ Fixed bug on empty string
-
-2.0.0 (2013-08-30)
-+ Fixed bugs on wrong iv or crypted data

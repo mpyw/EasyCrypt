@@ -1,0 +1,44 @@
+{
+    "name": "mpyw/easycrypt",
+    "description": "A class that provides simple interface for decryptable encryption.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "encrypt",
+        "decrypt",
+        "openssl"
+    ],
+    "authors": [
+        {
+            "name": "mpyw",
+            "email": "ryosuke_i_628@yahoo.co.jp"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "mpyw\\EasyCrypt\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "ext-openssl": "*"
+    },
+    "require-dev": {
+        "php": ">=7.0.0",
+        "lib-curl": ">=7.2.0",
+        "codeception/codeception": "^2.2",
+        "satooshi/php-coveralls": "^1.0"
+    },
+    "scripts": {
+        "test": [
+            "php vendor/bin/codecept run unit --coverage --coverage-xml"
+        ]
+    },
+    "archive": {
+        "exclude": [
+            "*",
+            ".*",
+            "!/src/*"
+        ]
+    }
+}
