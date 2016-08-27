@@ -13,7 +13,7 @@ composer install mpyw/easycrypt:^3.0
 ```php
 <?php
 
-require 'vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 use mpyw\EasyCrypt\Cryptor;
 
 $cryptor = new Cryptor;
