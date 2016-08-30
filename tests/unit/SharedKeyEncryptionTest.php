@@ -5,8 +5,8 @@ use mpyw\EasyCrypt\Cryptor;
 /**
  * @requires PHP 7.0
  */
-class CoTest extends \Codeception\TestCase\Test {
-
+class CoTest extends \Codeception\TestCase\Test
+{
     public function testInvalidMethod()
     {
         $this->setExpectedException(\DomainException::class);
