@@ -5,7 +5,7 @@ A class that provides simple interface for **decryptable** encryption.
 ## Installing
 
 ```
-composer install mpyw/easycrypt
+composer require mpyw/easycrypt
 ```
 
 ## Usage
