@@ -1,28 +1,26 @@
 checks:
   php:
     code_rating: true
-    duplication: true
 
 filter:
   excluded_paths:
     - tests/*
-    - examples/*
     - vendor/*
 
 build:
 
   environment:
-    php: '7.0.8'
+    php: '7.4'
 
   dependencies:
     before:
-      - 'composer install'
-      - './vendor/bin/codecept build'
+      - composer install
+      - mkdir -p build/logs
 
   tests:
     override:
       -
-        command: 'php vendor/bin/codecept run unit --coverage --coverage-xml'
+        command: 'phpdbg -qrr vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
         coverage:
-          file: 'tests/_output/coverage.xml'
-          format: 'php-clover'
+          file: 'build/logs/clover.xml'
+          format: 'clover'
