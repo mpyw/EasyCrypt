@@ -1,25 +1,21 @@
 language: php
 
 php:
-  - 7.0.8
-
-install:
-  - composer install
-  - ./vendor/bin/codecept build
-
-sudo: false
+  - 7.1
+  - 7.2
+  - 7.3
+  - 7.4
 
 cache:
   directories:
     - ./vendor
     - $HOME/.composer/cache
 
+before_script:
+  - mkdir -p build/logs
+
 script:
-  - php vendor/bin/codecept run unit --coverage --coverage-xml
+  - phpdbg -qrr vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
-branches:
-  only:
-    - master
-
-after_script:
-  - travis_retry php vendor/bin/coveralls
+after_success:
+  - travis_retry php vendor/bin/php-coveralls -v

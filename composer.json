@@ -16,28 +16,24 @@
     ],
     "autoload": {
         "psr-4": {
-            "mpyw\\EasyCrypt\\": "src/"
+            "Mpyw\\EasyCrypt\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mpyw\\EasyCrypt\\Tests\\": "tests/"
         }
     },
     "require": {
-        "php": ">=5.4.0",
+        "php": "^7.1",
         "ext-openssl": "*"
     },
     "require-dev": {
-        "php": ">=7.0.0",
-        "codeception/codeception": "^2.2",
-        "satooshi/php-coveralls": "^1.0"
+        "php": "^7.1",
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "php-coveralls/php-coveralls": "^2.2",
+        "phpunit/phpunit": "^8.5"
     },
     "scripts": {
-        "test": [
-            "php vendor/bin/codecept run unit --coverage --coverage-xml"
-        ]
-    },
-    "archive": {
-        "exclude": [
-            "*",
-            ".*",
-            "!/src/*"
-        ]
     }
 }

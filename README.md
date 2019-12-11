@@ -1,28 +1,57 @@
-# EasyCrypt [![Build Status](https://travis-ci.org/mpyw/EasyCrypt.svg?branch=master)](https://travis-ci.org/mpyw/EasyCrypt) [![Coverage Status](https://coveralls.io/repos/github/mpyw/EasyCrypt/badge.svg?branch=master)](https://coveralls.io/github/mpyw/EasyCrypt?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/?branch=master)
+# EasyCrypt [![Build Status](https://travis-ci.com/mpyw/EasyCrypt.svg?branch=master)](https://travis-ci.com/mpyw/EasyCrypt) [![Coverage Status](https://coveralls.io/repos/github/mpyw/EasyCrypt/badge.svg?branch=master)](https://coveralls.io/github/mpyw/EasyCrypt?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/?branch=master)
 
-A class that provides simple interface for **decryptable** encryption.  
+A class that provides simple interface for **decryptable** encryption.
 
 ## Installing
 
 ```
-composer install mpyw/easycrypt:^3.0
+composer install mpyw/easycrypt
 ```
 
 ## Usage
 
+### Basic
+
 ```php
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-use mpyw\EasyCrypt\Cryptor;
+use Mpyw\EasyCrypt\Cryptor;
 
 $cryptor = new Cryptor;
 
-$secret_data = '[Secret Data]';
+$secretData = '[Secret Data]';
 $password = '[Password]';
 
-$encrypted = $cryptor->encrypt($secret_data, $password);
-$decrypted = $cryptor->decrypt($enctypred, $password);
+$encrypted = $cryptor->encrypt($secretData, $password);
+$decrypted = $cryptor->decrypt($encrypted, $password); // String on success, false on failure.
 
-var_dump($secret_data === $decrypted); // bool(true)
+var_dump($secretData === $decrypted); // bool(true)
+```
+
+### Throw `DecryptionFailedException` when decryption failed
+
+It throws `DecryptionFailedException` instead of returning false.
+
+```php
+$decrypted = $cryptor->mustDecrypt($encrypted, $password);
+```
+
+### Use fixed password
+
+You can use `FixedPasswordCryptor` instead of raw `Cryptor`.
+This is useful when we use a fixed password from an application config.
+
+```php
+<?php
+
+use Mpyw\EasyCrypt\FixedPasswordCryptor;
+
+$cryptor = new FixedPasswordCryptor('[Password]');
+
+$secretData = '[Secret Data]';
+
+$encrypted = $cryptor->encrypt($secretData);
+$decrypted = $cryptor->decrypt($encrypted); // String on success, false on failure.
+
+var_dump($secretData === $decrypted); // bool(true)
 ```
