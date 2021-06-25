@@ -2,6 +2,10 @@
 
 A class that provides simple interface for **decryptable** encryption.
 
+## Requirements
+
+- PHP: `^7.1 || ^8.0`
+
 ## Installing
 
 ```
