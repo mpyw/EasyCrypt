@@ -30,8 +30,8 @@ class FixedPasswordCryptorTest extends TestCase
 
     public function testRc4(): void
     {
-        $cryptor = new FixedPasswordCryptor('password', new Cryptor('RC4'));
-        $anotherCryptor = new FixedPasswordCryptor('passward', new Cryptor('RC4'));
+        $cryptor = new FixedPasswordCryptor('password', new Cryptor('rc4'));
+        $anotherCryptor = new FixedPasswordCryptor('passward', new Cryptor('rc4'));
 
         $encryptedA = $cryptor->encrypt('data');
         $encryptedB = $cryptor->encrypt('data');

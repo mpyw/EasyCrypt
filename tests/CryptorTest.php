@@ -34,7 +34,7 @@ class CryptorTest extends TestCase
 
     public function testRc4(): void
     {
-        $cryptor = new Cryptor('RC4');
+        $cryptor = new Cryptor('rc4');
 
         $encryptedA = $cryptor->encrypt('data', 'password');
         $encryptedB = $cryptor->encrypt('data', 'password');
