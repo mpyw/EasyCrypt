@@ -1,4 +1,4 @@
-# EasyCrypt ![Build Status](https://github.com/mpyw/EasyCrypt/actions/workflows/test.yml/badge.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/mpyw/EasyCrypt/badge.svg?branch=master)](https://coveralls.io/github/mpyw/EasyCrypt?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/?branch=master)
+# EasyCrypt [![Build Status](https://github.com/mpyw/EasyCrypt/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/mpyw/EasyCrypt/actions) [![Coverage Status](https://coveralls.io/repos/github/mpyw/EasyCrypt/badge.svg?branch=master)](https://coveralls.io/github/mpyw/EasyCrypt?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mpyw/EasyCrypt/?branch=master)
 
 A class that provides simple interface for **decryptable** encryption.
 
