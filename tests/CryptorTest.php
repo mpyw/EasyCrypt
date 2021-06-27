@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Mpyw\EasyCrypt\Tests;
 
 use Mpyw\EasyCrypt\Cryptor;
 use Mpyw\EasyCrypt\Exceptions\DecryptionFailedException;

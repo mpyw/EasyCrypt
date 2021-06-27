@@ -1,10 +1,9 @@
 <?php
 
-namespace Tests;
+namespace Mpyw\EasyCrypt\Tests;
 
 use Mpyw\EasyCrypt\Cryptor;
 use Mpyw\EasyCrypt\Exceptions\DecryptionFailedException;
-use Mpyw\EasyCrypt\Exceptions\UnsupportedCipherException;
 use Mpyw\EasyCrypt\FixedPasswordCryptor;
 use PHPUnit\Framework\TestCase;
 
