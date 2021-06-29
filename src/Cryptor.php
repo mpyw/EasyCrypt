@@ -18,7 +18,12 @@ class Cryptor implements CryptorInterface
     /**
      * @var int
      */
-    protected $length;
+    protected $ivLength;
+
+    /**
+     * @var null|int
+     */
+    protected $tagLength;
 
     /**
      * Constructor.
@@ -34,7 +39,10 @@ class Cryptor implements CryptorInterface
         }
 
         $this->method = $method;
-        $this->length = openssl_cipher_iv_length($method);
+        $this->ivLength = openssl_cipher_iv_length($method);
+
+        openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, $this->random($this->ivLength), $tag);
+        $this->tagLength = $tag === null ? null : strlen($tag);
     }
 
     /**
@@ -46,8 +54,8 @@ class Cryptor implements CryptorInterface
      */
     public function encrypt(string $data, string $password): string
     {
-        $iv = $this->random($this->length);
-        $encrypted = openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
+        $iv = $this->random($this->ivLength);
+        $encrypted = openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
 
         if ($encrypted === false) {
             // @codeCoverageIgnoreStart
@@ -55,7 +63,7 @@ class Cryptor implements CryptorInterface
             // @codeCoverageIgnoreEnd
         }
 
-        return "$iv$encrypted";
+        return "$iv$encrypted$tag";
     }
 
     /**
@@ -67,14 +75,22 @@ class Cryptor implements CryptorInterface
      */
     public function decrypt(string $data, string $password)
     {
-        $iv = substr($data, 0, $this->length);
-
-        if (strlen($iv) !== $this->length) {
+        $iv = substr($data, 0, $this->ivLength);
+        if (strlen($iv) !== $this->ivLength) {
             return false;
         }
+        $data = substr($data, $this->ivLength);
 
-        $data = substr($data, $this->length);
-        return openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
+        $tag = null;
+        if ($this->tagLength !== null) {
+            $tag = substr($data, -$this->tagLength);
+            if (strlen($tag) !== $this->tagLength) {
+                return false;
+            }
+            $data = substr($data, 0, -$this->tagLength);
+        }
+
+        return openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
     }
 
     /**
