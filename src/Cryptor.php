@@ -41,7 +41,10 @@ class Cryptor implements CryptorInterface
         $this->method = $method;
         $this->ivLength = openssl_cipher_iv_length($method);
 
+        set_error_handler(function () {});
         openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, $this->random($this->ivLength), $tag);
+        restore_error_handler();
+
         $this->tagLength = $tag === null ? null : strlen($tag);
     }
 
@@ -55,7 +58,10 @@ class Cryptor implements CryptorInterface
     public function encrypt(string $data, string $password): string
     {
         $iv = $this->random($this->ivLength);
-        $encrypted = openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
+        $tag = null;
+        $encrypted = $this->tagLength
+            ? openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
+            : openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
 
         if ($encrypted === false) {
             // @codeCoverageIgnoreStart
@@ -109,7 +115,9 @@ class Cryptor implements CryptorInterface
             $data = substr($data, 0, -$this->tagLength);
         }
 
-        $decrypted = openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
+        $decrypted = $this->tagLength
+            ? openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
+            : openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
 
         if ($decrypted === false) {
             $error = openssl_error_string();
