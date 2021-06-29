@@ -75,22 +75,11 @@ class Cryptor implements CryptorInterface
      */
     public function decrypt(string $data, string $password)
     {
-        $iv = substr($data, 0, $this->ivLength);
-        if (strlen($iv) !== $this->ivLength) {
+        try {
+            return $this->mustDecrypt($data, $password);
+        } catch (DecryptionFailedException $e) {
             return false;
         }
-        $data = substr($data, $this->ivLength);
-
-        $tag = null;
-        if ($this->tagLength !== null) {
-            $tag = substr($data, -$this->tagLength);
-            if (strlen($tag) !== $this->tagLength) {
-                return false;
-            }
-            $data = substr($data, 0, -$this->tagLength);
-        }
-
-        return openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
     }
 
     /**
@@ -103,10 +92,33 @@ class Cryptor implements CryptorInterface
      */
     public function mustDecrypt(string $data, string $password): string
     {
-        $decrypted = $this->decrypt($data, $password);
+        $originalData = $data;
+
+        $iv = substr($data, 0, $this->ivLength);
+        if (strlen($iv) !== $this->ivLength) {
+            throw new DecryptionFailedException('invalid iv length.', $originalData);
+        }
+        $data = substr($data, $this->ivLength);
+
+        $tag = null;
+        if ($this->tagLength !== null) {
+            $tag = substr($data, -$this->tagLength);
+            if (strlen($tag) !== $this->tagLength) {
+                throw new DecryptionFailedException('invalid tag length.', $originalData);
+            }
+            $data = substr($data, 0, -$this->tagLength);
+        }
+
+        $decrypted = openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag);
 
         if ($decrypted === false) {
-            throw new DecryptionFailedException(openssl_error_string(), $data);
+            $error = openssl_error_string();
+            if ($error === false) {
+                $error = $this->tagLength
+                    ? 'invalid tag content.'
+                    : 'unknown error.';
+            }
+            throw new DecryptionFailedException($error, $originalData);
         }
 
         return $decrypted;
