@@ -18,7 +18,12 @@ class Cryptor implements CryptorInterface
     /**
      * @var int
      */
-    protected $length;
+    protected $ivLength;
+
+    /**
+     * @var null|int
+     */
+    protected $tagLength;
 
     /**
      * Constructor.
@@ -34,7 +39,13 @@ class Cryptor implements CryptorInterface
         }
 
         $this->method = $method;
-        $this->length = openssl_cipher_iv_length($method);
+        $this->ivLength = openssl_cipher_iv_length($method);
+
+        set_error_handler(function () {});
+        openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, $this->random($this->ivLength), $tag);
+        restore_error_handler();
+
+        $this->tagLength = $tag === null ? null : strlen($tag);
     }
 
     /**
@@ -46,8 +57,11 @@ class Cryptor implements CryptorInterface
      */
     public function encrypt(string $data, string $password): string
     {
-        $iv = $this->random($this->length);
-        $encrypted = openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
+        $iv = $this->random($this->ivLength);
+        $tag = null;
+        $encrypted = $this->tagLength
+            ? openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
+            : openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
 
         if ($encrypted === false) {
             // @codeCoverageIgnoreStart
@@ -55,7 +69,7 @@ class Cryptor implements CryptorInterface
             // @codeCoverageIgnoreEnd
         }
 
-        return "$iv$encrypted";
+        return "$iv$encrypted$tag";
     }
 
     /**
@@ -67,14 +81,11 @@ class Cryptor implements CryptorInterface
      */
     public function decrypt(string $data, string $password)
     {
-        $iv = substr($data, 0, $this->length);
-
-        if (strlen($iv) !== $this->length) {
+        try {
+            return $this->mustDecrypt($data, $password);
+        } catch (DecryptionFailedException $e) {
             return false;
         }
-
-        $data = substr($data, $this->length);
-        return openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
     }
 
     /**
@@ -87,10 +98,35 @@ class Cryptor implements CryptorInterface
      */
     public function mustDecrypt(string $data, string $password): string
     {
-        $decrypted = $this->decrypt($data, $password);
+        $originalData = $data;
+
+        $iv = substr($data, 0, $this->ivLength);
+        if (strlen($iv) !== $this->ivLength) {
+            throw new DecryptionFailedException('invalid iv length.', $originalData);
+        }
+        $data = substr($data, $this->ivLength);
+
+        $tag = null;
+        if ($this->tagLength !== null) {
+            $tag = substr($data, -$this->tagLength);
+            if (strlen($tag) !== $this->tagLength) {
+                throw new DecryptionFailedException('invalid tag length.', $originalData);
+            }
+            $data = substr($data, 0, -$this->tagLength);
+        }
+
+        $decrypted = $this->tagLength
+            ? openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
+            : openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
 
         if ($decrypted === false) {
-            throw new DecryptionFailedException(openssl_error_string(), $data);
+            $error = openssl_error_string();
+            if ($error === false) {
+                $error = $this->tagLength
+                    ? 'invalid tag content.'
+                    : 'unknown error.';
+            }
+            throw new DecryptionFailedException($error, $originalData);
         }
 
         return $decrypted;
