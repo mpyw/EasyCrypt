@@ -133,7 +133,7 @@ class Cryptor implements CryptorInterface
             if ($error === false) {
                 $error = $this->tagLength
                     ? 'invalid tag content.'
-                    : 'unknown error.';
+                    : 'unknown error.'; // @codeCoverageIgnore
             }
             throw new DecryptionFailedException($error, $originalData);
         }
