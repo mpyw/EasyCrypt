@@ -16,6 +16,8 @@ composer require mpyw/easycrypt
 
 ### Basic
 
+The default cipher method is `aes256` (`aes-256-cbc`).
+
 ```php
 <?php
 
@@ -58,4 +60,36 @@ $encrypted = $cryptor->encrypt($secretData);
 $decrypted = $cryptor->decrypt($encrypted); // String on success, false on failure.
 
 var_dump($secretData === $decrypted); // bool(true)
+```
+
+### Use AEAD (Authenticated Encryption with Associated Data) suites
+
+If you need to use AEAD suites that adopt CTR mode, it is recommended to provide truly unique counter value.
+
+```php
+use Mpyw\EasyCrypt\IvGeneratorInterface;
+
+class Counter implements IvGeneratorInterface
+{
+    protected \PDO $pdo;
+
+    public function __construct(\PDO $pdo)
+    {
+        $this->pdo = $pdo;
+    }
+
+    public function generate(int $length): string
+    {
+        $this->pdo->exec('INSERT INTO counters()');
+        return $this->pdo->lastInsertId();
+    }
+}
+```
+
+```php
+<?php
+
+use Mpyw\EasyCrypt\Cryptor;
+
+$cryptor = new Cryptor('aes-256-gcm', new Counter(new \PDO(...)));
 ```
