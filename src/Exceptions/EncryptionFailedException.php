@@ -5,6 +5,9 @@ namespace Mpyw\EasyCrypt\Exceptions;
 use Throwable;
 use UnexpectedValueException;
 
+/**
+ * @codeCoverageIgnore
+ */
 class EncryptionFailedException extends UnexpectedValueException implements EasyCryptException
 {
     use Concerns\HasOriginalMessage;

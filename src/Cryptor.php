@@ -5,6 +5,8 @@ namespace Mpyw\EasyCrypt;
 use Mpyw\EasyCrypt\Exceptions\DecryptionFailedException;
 use Mpyw\EasyCrypt\Exceptions\EncryptionFailedException;
 use Mpyw\EasyCrypt\Exceptions\UnsupportedCipherException;
+use Mpyw\EasyCrypt\IvGenerator\IvGeneratorInterface;
+use Mpyw\EasyCrypt\IvGenerator\RandomIvGenerator;
 
 class Cryptor implements CryptorInterface
 {
@@ -26,11 +28,17 @@ class Cryptor implements CryptorInterface
     protected $tagLength;
 
     /**
+     * @var IvGeneratorInterface
+     */
+    protected $ivGenerator;
+
+    /**
      * Constructor.
      *
-     * @param string $method
+     * @param string                    $method
+     * @param null|IvGeneratorInterface $ivGenerator
      */
-    public function __construct(string $method = self::DEFAULT_CIPHER_METHOD)
+    public function __construct(string $method = self::DEFAULT_CIPHER_METHOD, ?IvGeneratorInterface $ivGenerator = null)
     {
         $methods = openssl_get_cipher_methods(true);
 
@@ -40,9 +48,10 @@ class Cryptor implements CryptorInterface
 
         $this->method = $method;
         $this->ivLength = openssl_cipher_iv_length($method);
+        $this->ivGenerator = $ivGenerator ?? new RandomIvGenerator();
 
         set_error_handler(function () {});
-        openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, $this->random($this->ivLength), $tag);
+        openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, (new RandomIvGenerator())->generate($this->ivLength), $tag);
         restore_error_handler();
 
         $this->tagLength = $tag === null ? null : strlen($tag);
@@ -57,7 +66,7 @@ class Cryptor implements CryptorInterface
      */
     public function encrypt(string $data, string $password): string
     {
-        $iv = $this->random($this->ivLength);
+        $iv = $this->ivGenerator->generate($this->ivLength);
         $tag = null;
         $encrypted = $this->tagLength
             ? openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
@@ -124,30 +133,11 @@ class Cryptor implements CryptorInterface
             if ($error === false) {
                 $error = $this->tagLength
                     ? 'invalid tag content.'
-                    : 'unknown error.';
+                    : 'unknown error.'; // @codeCoverageIgnore
             }
             throw new DecryptionFailedException($error, $originalData);
         }
 
         return $decrypted;
-    }
-
-    /**
-     * Get random bytes.
-     *
-     * @param  int    $length
-     * @return string
-     */
-    protected function random(int $length): string
-    {
-        if ($length < 1) {
-            return '';
-        }
-
-        do {
-            $data = openssl_random_pseudo_bytes($length, $secure);
-        } while (!$secure);
-
-        return $data;
     }
 }
