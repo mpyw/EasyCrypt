@@ -67,7 +67,7 @@ var_dump($secretData === $decrypted); // bool(true)
 If you need to use AEAD suites that adopt CTR mode, it is recommended to provide truly unique counter value.
 
 ```php
-use Mpyw\EasyCrypt\IvGeneratorInterface;
+use Mpyw\EasyCrypt\IvGenerator\IvGeneratorInterface;
 
 class Counter implements IvGeneratorInterface
 {
