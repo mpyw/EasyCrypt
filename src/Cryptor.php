@@ -3,29 +3,18 @@
 namespace Mpyw\EasyCrypt;
 
 use Mpyw\EasyCrypt\Exceptions\DecryptionFailedException;
-use Mpyw\EasyCrypt\Exceptions\EncryptionFailedException;
-use Mpyw\EasyCrypt\Exceptions\UnsupportedCipherException;
 use Mpyw\EasyCrypt\IvGenerator\IvGeneratorInterface;
 use Mpyw\EasyCrypt\IvGenerator\RandomIvGenerator;
+use Mpyw\EasyCrypt\OpenSSL\OpenSSL;
 
 class Cryptor implements CryptorInterface
 {
     public const DEFAULT_CIPHER_METHOD = 'aes256';
 
     /**
-     * @var string
+     * @var OpenSSL
      */
-    protected $method;
-
-    /**
-     * @var int
-     */
-    protected $ivLength;
-
-    /**
-     * @var null|int
-     */
-    protected $tagLength;
+    protected $openssl;
 
     /**
      * @var IvGeneratorInterface
@@ -40,21 +29,8 @@ class Cryptor implements CryptorInterface
      */
     public function __construct(string $method = self::DEFAULT_CIPHER_METHOD, ?IvGeneratorInterface $ivGenerator = null)
     {
-        $methods = openssl_get_cipher_methods(true);
-
-        if (!in_array($method, $methods, true)) {
-            throw new UnsupportedCipherException($method);
-        }
-
-        $this->method = $method;
-        $this->ivLength = openssl_cipher_iv_length($method);
+        $this->openssl = new OpenSSL($method);
         $this->ivGenerator = $ivGenerator ?? new RandomIvGenerator();
-
-        set_error_handler(function () {});
-        openssl_encrypt('', $this->method, '', OPENSSL_RAW_DATA, (new RandomIvGenerator())->generate($this->ivLength), $tag);
-        restore_error_handler();
-
-        $this->tagLength = $tag === null ? null : strlen($tag);
     }
 
     /**
@@ -66,19 +42,10 @@ class Cryptor implements CryptorInterface
      */
     public function encrypt(string $data, string $password): string
     {
-        $iv = $this->ivGenerator->generate($this->ivLength);
-        $tag = null;
-        $encrypted = $this->tagLength
-            ? openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
-            : openssl_encrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
+        $iv = $this->ivGenerator->generate($this->openssl->ivLength());
+        $encrypted = $this->openssl->encrypt($data, $password, $iv);
 
-        if ($encrypted === false) {
-            // @codeCoverageIgnoreStart
-            throw new EncryptionFailedException(openssl_error_string());
-            // @codeCoverageIgnoreEnd
-        }
-
-        return "$iv$encrypted$tag";
+        return "$iv{$encrypted->data}{$encrypted->tag}";
     }
 
     /**
@@ -109,35 +76,29 @@ class Cryptor implements CryptorInterface
     {
         $originalData = $data;
 
-        $iv = substr($data, 0, $this->ivLength);
-        if (strlen($iv) !== $this->ivLength) {
+        $iv = static::cutFragmentFrom($data, $this->openssl->ivLength());
+        if (strlen($iv) !== $this->openssl->ivLength()) {
             throw new DecryptionFailedException('invalid iv length.', $originalData);
         }
-        $data = substr($data, $this->ivLength);
 
-        $tag = null;
-        if ($this->tagLength !== null) {
-            $tag = substr($data, -$this->tagLength);
-            if (strlen($tag) !== $this->tagLength) {
+        if ($this->openssl->useTag()) {
+            $tag = static::cutFragmentFrom($data, -$this->openssl->tagLength());
+            if (strlen($tag) !== $this->openssl->tagLength()) {
                 throw new DecryptionFailedException('invalid tag length.', $originalData);
             }
-            $data = substr($data, 0, -$this->tagLength);
         }
 
-        $decrypted = $this->tagLength
-            ? openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv, $tag)
-            : openssl_decrypt($data, $this->method, $password, OPENSSL_RAW_DATA, $iv);
+        return $this->openssl->decrypt($data, $originalData, $password, $iv, $tag ?? null);
+    }
 
-        if ($decrypted === false) {
-            $error = openssl_error_string();
-            if ($error === false) {
-                $error = $this->tagLength
-                    ? 'invalid tag content.'
-                    : 'unknown error.'; // @codeCoverageIgnore
-            }
-            throw new DecryptionFailedException($error, $originalData);
+    protected static function cutFragmentFrom(string &$data, int $length): string
+    {
+        [$fragment, $data] = [substr($data, 0, $length), substr($data, $length)];
+
+        if ($length < 0) {
+            [$fragment, $data] = [$data, $fragment];
         }
 
-        return $decrypted;
+        return $fragment;
     }
 }
