@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        php: [7.1, 7.2, 7.3, 7.4, 8.0, 8.1]
+        php: [7.1, 7.2, 7.3, 7.4, '8.0', 8.1]
 
     steps:
       - uses: actions/checkout@v2
@@ -19,7 +19,6 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: xdebug
 
-      - run: composer require phpunit/phpunit --dev --no-update
       - run: composer update
       - run: mkdir -p build/logs
       - run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
