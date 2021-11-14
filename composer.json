@@ -29,6 +29,6 @@
         "ext-openssl": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": ">=7.5"
     }
 }
