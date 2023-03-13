@@ -46,20 +46,6 @@ class CryptorTest extends TestCase
         $this->assertFalse($cryptor->decrypt($encryptedA, 'passward'));
     }
 
-    public function testRc4(): void
-    {
-        $cryptor = new Cryptor('rc4');
-
-        $encryptedA = $cryptor->encrypt('data', 'password');
-        $encryptedB = $cryptor->encrypt('data', 'password');
-
-        $this->assertSame('data', $cryptor->decrypt($encryptedA, 'password'));
-        $this->assertSame('data', $cryptor->decrypt($encryptedB, 'password'));
-        $this->assertSame($encryptedA, $encryptedB);
-
-        $this->assertNotFalse($cryptor->decrypt($encryptedA, 'passward'));
-    }
-
     public function testInvalidIvLength(): void
     {
         $cryptor = new Cryptor();

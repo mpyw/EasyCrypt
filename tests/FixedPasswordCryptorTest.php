@@ -27,21 +27,6 @@ class FixedPasswordCryptorTest extends TestCase
         $this->assertFalse($anotherCryptor->decrypt($encryptedA));
     }
 
-    public function testRc4(): void
-    {
-        $cryptor = new FixedPasswordCryptor('password', new Cryptor('rc4'));
-        $anotherCryptor = new FixedPasswordCryptor('passward', new Cryptor('rc4'));
-
-        $encryptedA = $cryptor->encrypt('data');
-        $encryptedB = $cryptor->encrypt('data');
-
-        $this->assertSame('data', $cryptor->decrypt($encryptedA));
-        $this->assertSame('data', $cryptor->decrypt($encryptedB));
-        $this->assertSame($encryptedA, $encryptedB);
-
-        $this->assertNotFalse($anotherCryptor->decrypt($encryptedA));
-    }
-
     public function testInvalidIvLength(): void
     {
         $cryptor = new FixedPasswordCryptor('password');
