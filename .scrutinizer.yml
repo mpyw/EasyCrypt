@@ -16,7 +16,7 @@ build:
           - php-scrutinizer-run
 
   environment:
-    php: '7.4'
+    php: '8.3.17'
 
   dependencies:
     before:

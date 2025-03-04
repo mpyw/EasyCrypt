@@ -4,7 +4,10 @@ A class that provides simple interface for **decryptable** encryption.
 
 ## Requirements
 
-- PHP: `^7.1 || ^8.0`
+- PHP: `^8.2`
+
+> [!NOTE]
+> Older versions have outdated dependency requirements. If you cannot prepare the latest environment, please refer to past releases.
 
 ## Installing
 
