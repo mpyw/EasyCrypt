@@ -13,8 +13,10 @@ class RandomIvGenerator implements IvGeneratorInterface
     public function generate(int $length): string
     {
         if ($length < 1) {
+            // @codeCoverageIgnoreStart
             return '';
         }
+        // @codeCoverageIgnoreEnd
 
         do {
             $data = openssl_random_pseudo_bytes($length, $secure);
